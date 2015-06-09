@@ -14,7 +14,7 @@
 # Created by: Michael C. Nelson
 # Version: 1
 # Created on: 2015-06-03
-# Revised on: 2015-06-05
+# Revised on: 2015-06-09
 # License: GPL3
 ######################################################################################################
 
@@ -27,22 +27,24 @@ use Time::Seconds;
 use Getopt::Long;
 use Scalar::Util qw(openhandle);
 
-###### Initial variable instancing ######
-my $genus;
-my $center = 'UCONNMISEQ';
+###### Initial variable instancing and options setting ######
+my $input;
+my $output;
 my $outdir;
 my $lazy;
-my $input;
 my $logfile;
+my $genus;
+my $center = 'UCONNMISEQ';
 my $cpus = 4;
 my $starttime = localtime;
 my $fp = find_exe("prokka");
 err("FATAL ERROR: Can't find Prokka in your \$PATH!") if !$fp;
+my $procmd = "prokka --addgenes --rawproduct ";
 
 my @Options;
 setOptions();
 
-###### ACTUAL WORK GETS DONE HERE ######
+###### Begin initial checks and building of prokka command ######
 if ($input) {
     open(IN, $input) or err("ERROR: Could not open input file.\n");    
 }
@@ -50,12 +52,21 @@ else {
     err("ERROR: Input file not provided")
 }
 
+$procmd .= "--cpus $cpus ";
+
+if ($lazy) {
+    $procmd .= "--debug ";
+}
+
+if ($genus) {
+    $procmd .= "--usegenus ";
+}
+
 if ($outdir) {
     if (-d $outdir){
         err("Output directory already exists, choose a new name for --outdir that is not $outdir");
     }
     else {
-        msg("Creating $outdir to put results into.");
         runcmd("mkdir -p \Q$outdir\E")
     }
     $logfile = "$outdir/Batch_Prokka.log";    
@@ -63,8 +74,17 @@ if ($outdir) {
 else {
     $logfile = "Batch_Prokka.log";
 }
+
+###### ACTUAL WORK GETS DONE HERE ######
+
 open LOG, '>', $logfile or err("Can't open logfile");
 msg("Began running Batch_Prokka.pl at $starttime");
+if ($outdir) {
+        msg("Output directory for each genome will be put into $outdir\/.");
+    }
+    else {
+        msg("Output directory for each genome will be put into current directory.");
+    }
 msg("Will use maximum of $cpus cores.");
 msg("Writing log to: $logfile");
 msg("Using $input as the input file.");
@@ -77,14 +97,19 @@ while (<IN>) {
     my $gSpecies = $line[2];
     my $gID = $line[3];
     my $gLocus = $line[4];
-    my $command = "prokka --addgenes ";
-    ## Build up the prokka command
-    msg("Annotating genome $gID using the file $gFP");
+    ## Finalize the prokka command using table data
     if ($outdir) {
-        my $output = $outdir.$gID;
+        $output = $outdir."/".$gID;
     }
     else {
+        $output = $gID;
     }
+    $procmd .= "--outdir $output --genus $gGenus --species $gSpecies --strain $gID --locustag $gLocus --prefix $gID --centre $center $gFP";
+
+    ## Now run prokka
+    msg("Annotating genome $gID using the file $gFP:");
+    #print "The prokka command that would be run is:\n\n$procmd\n\n";
+    runcmd($procmd);
 }
 
 
@@ -122,7 +147,7 @@ sub err {
 sub setOptions {
     @Options = (
     'Mandatory:',
-    {OPT=>"input", VAR=>\$input, DESC=>"The input table of genomes to annotate."},
+    {OPT=>"input=s", VAR=>\$input, DESC=>"The input table of genomes to annotate."},
     'Options:',
     {OPT=>"outdir=s", VAR=>\$outdir, DESC=>"Directory where results will be put. [DEFAULT=$outdir]\n\t\t\t\t\t NOTE: Each annotated genome will be put in its own directory named according to the Strain ID provided in the input file."},
     {OPT=>"usegenus!", VAR=>\$genus, DESC=>"Use custom database for initial annotation.\n\t\t\t\t\t NOTE: Genus name provided in input file must match a valid database name or error will occur."},
