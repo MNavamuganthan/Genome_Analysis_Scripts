@@ -1,0 +1,1 @@
+contigs1.fasta	Aeromonas	hydrophila	Ah1	ALO05
