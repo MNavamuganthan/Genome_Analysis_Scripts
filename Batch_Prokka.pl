@@ -11,7 +11,7 @@
 # Script skeleton and some tasty bits taken from prokka (https://github.com/tseemann/prokka)
 #
 # Created by: Michael C. Nelson
-# Version: 1.1
+# Version: 1.2
 # Created on: 2015-06-03
 # Revised on: 2015-06-10
 # License: GPL3
@@ -31,6 +31,7 @@ my $input;
 my $output;
 my $outdir;
 my $lazy;
+my $quiet;
 my $logfile;
 my $genus;
 my $center = 'UCONNMISEQ';
@@ -56,9 +57,11 @@ $procmd .= "--cpus $cpus ";
 if ($lazy) {
     $procmd .= "--debug ";
 }
-
 if ($genus) {
     $procmd .= "--usegenus ";
+}
+if ($quiet) {
+    $procmd .= "--quiet ";
 }
 
 if ($outdir) {
@@ -154,7 +157,8 @@ sub setOptions {
     {OPT=>"usegenus!", VAR=>\$genus, DESC=>"Use custom database for initial annotation.\n\t\t    NOTE: Genus name provided in input file must match a valid database name or error will occur."},
     {OPT=>"center=s", VAR=>\$center, DEFAULT=>$center, DESC=>"Sequencing center name."},
     {OPT=>"cpus=i", VAR=>\$cpus, DESC=>"Numer of CPUs to use. [DEFAULT=$cpus]"},
-    {OPT=>"lazy!", VAR=>\$lazy, DESC=>"Don't delete intermediate files."},    
+    {OPT=>"quiet!", VAR=>\$quiet, DESC=>"Don't display prokka output."},
+    {OPT=>"lazy!", VAR=>\$lazy, DESC=>"Don't delete intermediate files."},
     'Help:',
     {OPT=>"help", VAR=>\&usage, DESC=>"Print this help message."},
     {OPT=>"example", VAR=>\&example, DESC=>"Print an example input table."},
