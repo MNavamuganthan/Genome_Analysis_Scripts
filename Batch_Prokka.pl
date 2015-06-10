@@ -4,7 +4,6 @@
 # The input list file is a tab-delimited, one entry per line format.
 # Genome files should be in fasta/multi-fasta format.
 # Output for each genome is put into individual directories named according to the ID given by the user in the input list file
-# User specifies the kmer size during execution, which will be appended to the sorted output filename (_Nmer.txt)
 #
 # NB: This script serves as a batch wrapper for prokka which does all of the actual work.
 #     The prokka executable must be present somewhere in the users PATH in order for this script to work.
@@ -109,8 +108,9 @@ while (<IN>) {
 
     ## Now run prokka
     msg("Annotating genome $gID using the file $gFP:");
-    print "The prokka command that would be run is:\n\n$cmd\n\n";
-    #runcmd($cmd);
+    msg("Output is in the $output directory.");
+    #print "The prokka command that would be run is:\n\n$cmd\n\n";
+    runcmd($cmd);
 }
 
 
