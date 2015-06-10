@@ -12,9 +12,9 @@
 # Script skeleton and some tasty bits taken from prokka (https://github.com/tseemann/prokka)
 #
 # Created by: Michael C. Nelson
-# Version: 1
+# Version: 1.1
 # Created on: 2015-06-03
-# Revised on: 2015-06-09
+# Revised on: 2015-06-10
 # License: GPL3
 ######################################################################################################
 
@@ -97,6 +97,7 @@ while (<IN>) {
     my $gSpecies = $line[2];
     my $gID = $line[3];
     my $gLocus = $line[4];
+    my $cmd = $procmd;
     ## Finalize the prokka command using table data
     if ($outdir) {
         $output = $outdir."/".$gID;
@@ -104,12 +105,12 @@ while (<IN>) {
     else {
         $output = $gID;
     }
-    $procmd .= "--outdir $output --genus $gGenus --species $gSpecies --strain $gID --locustag $gLocus --prefix $gID --centre $center $gFP";
+    $cmd .= "--outdir $output --genus $gGenus --species $gSpecies --strain $gID --locustag $gLocus --prefix $gID --centre $center $gFP";
 
     ## Now run prokka
     msg("Annotating genome $gID using the file $gFP:");
-    #print "The prokka command that would be run is:\n\n$procmd\n\n";
-    runcmd($procmd);
+    print "The prokka command that would be run is:\n\n$cmd\n\n";
+    #runcmd($cmd);
 }
 
 
@@ -149,8 +150,8 @@ sub setOptions {
     'Mandatory:',
     {OPT=>"input=s", VAR=>\$input, DESC=>"The input table of genomes to annotate."},
     'Options:',
-    {OPT=>"outdir=s", VAR=>\$outdir, DESC=>"Directory where results will be put. [DEFAULT=$outdir]\n\t\t\t\t\t NOTE: Each annotated genome will be put in its own directory named according to the Strain ID provided in the input file."},
-    {OPT=>"usegenus!", VAR=>\$genus, DESC=>"Use custom database for initial annotation.\n\t\t\t\t\t NOTE: Genus name provided in input file must match a valid database name or error will occur."},
+    {OPT=>"outdir=s", VAR=>\$outdir, DESC=>"Directory where results will be put. [DEFAULT=$outdir]\n\t\t    NOTE: Each annotated genome will be put in its own directory named according to the Strain ID provided in the input file."},
+    {OPT=>"usegenus!", VAR=>\$genus, DESC=>"Use custom database for initial annotation.\n\t\t    NOTE: Genus name provided in input file must match a valid database name or error will occur."},
     {OPT=>"center=s", VAR=>\$center, DEFAULT=>$center, DESC=>"Sequencing center name."},
     {OPT=>"cpus=i", VAR=>\$cpus, DESC=>"Numer of CPUs to use. [DEFAULT=$cpus]"},
     {OPT=>"lazy!", VAR=>\$lazy, DESC=>"Don't delete intermediate files."},    
@@ -173,7 +174,7 @@ sub setOptions {
 
 sub usage {
     print STDERR
-    "\nBatch_prokka.pl: A prokka wrapper for batch annotation of multiple genome sequences.\n\n",
+    "\nBatch_prokka.pl: A prokka wrapper for batch annotation of multiple genome sequences.\n",
     "Usage:\tBatch_prokka.pl [options] --input genomes_list.txt\n\n";
     foreach (@Options) {
         if (ref) {
@@ -194,14 +195,14 @@ sub usage {
 
 sub example {
     print STDERR
-    "The input file format is tab-delimited as follows, without the header line.
+    "\nThe input file format is tab-delimited as follows, without the header line.
 Note that the genus name must match that of one of the custom databases available if using the --genus flag.
 Installed databases can be checked by running prokka --listdb.
 If actual values are not known they should be filled in with placeholders (e.g. unknown for Species)\n
     Contig files    Genus      Species     StrainID/Output directory  Locus tag  
     contigs1.fasta  Aeromonas  hydrophila  Ah1                        ALO05        
     contigs2.fasta  Aeromoans  veronii     Hm21                       M001
-    ...
-    ";
+    ...\n
+";
     exit(0);
 }

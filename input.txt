@@ -1,1 +1,2 @@
 contigs1.fasta	Aeromonas	hydrophila	Ah1	ALO05
+contigs2.fasta	Aeromoans	veronii	Av48	Avv487
