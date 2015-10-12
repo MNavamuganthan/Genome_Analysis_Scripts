@@ -11,9 +11,9 @@
 # Script skeleton and some tasty bits taken from prokka (https://github.com/tseemann/prokka)
 #
 # Created by: Michael C. Nelson
-# Version: 1.2
+# Version: 1.3.1
 # Created on: 2015-06-03
-# Revised on: 2015-06-10
+# Revised on: 2015-10-12
 # License: GPL3
 ######################################################################################################
 
@@ -31,6 +31,7 @@ my $input;
 my $output;
 my $outdir;
 my $lazy;
+my $raw;
 my $quiet;
 my $logfile;
 my $genus;
@@ -39,7 +40,7 @@ my $cpus = 4;
 my $starttime = localtime;
 my $fp = find_exe("prokka");
 err("FATAL ERROR: Can't find Prokka in your \$PATH!") if !$fp;
-my $procmd = "prokka --addgenes --rawproduct ";
+my $procmd = "prokka --addgenes ";
 
 my @Options;
 setOptions();
@@ -56,6 +57,9 @@ $procmd .= "--cpus $cpus ";
 
 if ($lazy) {
     $procmd .= "--debug ";
+}
+if ($raw) {
+    $procmd .= "--rawproduct ";
 }
 if ($genus) {
     $procmd .= "--usegenus ";
@@ -92,6 +96,7 @@ msg("Writing log to: $logfile");
 msg("Using $input as the input file.");
 
 while (<IN>) {
+    next if /^#/;
     chomp;
     my @line = split(/\t/);
     my $gFP = $line[0];
@@ -159,6 +164,7 @@ sub setOptions {
     {OPT=>"cpus=i", VAR=>\$cpus, DESC=>"Numer of CPUs to use. [DEFAULT=$cpus]"},
     {OPT=>"quiet!", VAR=>\$quiet, DESC=>"Don't display prokka output."},
     {OPT=>"lazy!", VAR=>\$lazy, DESC=>"Don't delete intermediate files."},
+    {OPT=>"raw!", VAR=>\$raw, DESC=>"Keep raw product names."},
     'Help:',
     {OPT=>"help", VAR=>\&usage, DESC=>"Print this help message."},
     {OPT=>"example", VAR=>\&example, DESC=>"Print an example input table."},
@@ -199,13 +205,13 @@ sub usage {
 
 sub example {
     print STDERR
-    "\nThe input file format is tab-delimited as follows, without the header line.
+    "\nThe input file format is tab-delimited as follows, with or without the header line.
 Note that the genus name must match that of one of the custom databases available if using the --genus flag.
 Installed databases can be checked by running prokka --listdb.
 If actual values are not known they should be filled in with placeholders (e.g. unknown for Species)\n
-    Contig files    Genus      Species     StrainID/Output directory  Locus tag  
-    contigs1.fasta  Aeromonas  hydrophila  Ah1                        ALO05        
-    contigs2.fasta  Aeromoans  veronii     Hm21                       M001
+    #Contig_files   Genus      Species      StrainID/Output_dir  Locus tag
+    contigs1.fasta  Aeromonas  hydrophila   Ah1                  ALO05
+    contigs2.fasta  Aeromonas  veronii      Hm21                 M001
     ...\n
 ";
     exit(0);
