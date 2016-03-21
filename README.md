@@ -19,6 +19,7 @@ Options:
   --cpus <#>        Numer of CPUs to use. [DEFAULT=4]
   --quiet           Don't display prokka output.
   --lazy            Don't delete intermediate files.
+  --raw             Keep raw product names.
 Help:
   --help            Print this help message.
   --example         Print an example input table.
@@ -29,8 +30,6 @@ __Useage:__
 Batch_Prokka.pl --input bath_input.txt --usegenus --center GrafLab --cpus 8
 ```
 ##
-
-
 
 
 
